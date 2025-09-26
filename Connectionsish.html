@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Not Connections</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #121212;
+            --color-tile: #2c2c2c;
+            --color-tile-selected: #5a5a5a;
+            --color-text: #ffffff;
+            --color-button: #4a4a4a;
+            --color-button-hover: #5a5a5a;
+            --color-mistake: #4a4a4a;
+            --color-mistake-used: #2c2c2c;
+            --font-family: 'Inter', sans-serif;
+            
+            --cat-yellow: #f9df6d;
+            --cat-green: #a0c35a;
+            --cat-blue: #b0c4ef;
+            --cat-purple: #d0b0ef;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: var(--font-family);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            text-align: center;
+            overflow: hidden; /* Prevents scrollbars from history panel */
+        }
+
+        .screen {
+            width: 100%;
+            max-width: 500px;
+            padding: 1rem;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        h2 {
+           font-size: 1.5rem;
+           font-weight: 600;
+        }
+
+        p {
+            color: #ccc;
+        }
+
+        .game-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 500px;
+            margin: auto;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1 / 1;
+            border-radius: 8px;
+            cursor: pointer;
+            touch-action: none;
+        }
+
+        .info-panel {
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        #message-box {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+
+        #message-box.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #mistakes-container {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center; /* Vertically align text and dots */
+            margin-bottom: 1rem;
+        }
+
+        .mistake-dot {
+            width: 16px;
+            height: 16px;
+            background-color: var(--color-mistake);
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+        
+        .mistake-dot.used {
+             background-color: var(--color-mistake-used);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .results-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .control-btn, .menu-btn {
+            background-color: var(--color-button);
+            color: var(--color-text);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            margin: 5px;
+        }
+
+        .control-btn:hover, .menu-btn:hover {
+            background-color: var(--color-button-hover);
+        }
+         .control-btn:active, .menu-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* Maker Screen Styles */
+        .maker-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        .category-inputs {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+        .maker-input {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--color-tile);
+            border: 1px solid var(--color-button);
+            border-left-width: 4px;
+            color: var(--color-text);
+            border-radius: 6px;
+            font-family: var(--font-family);
+            font-size: 0.9rem;
+            box-sizing: border-box;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+
+        .maker-input.category-0 { border-left-color: var(--cat-yellow); }
+        .maker-input.category-1 { border-left-color: var(--cat-green); }
+        .maker-input.category-2 { border-left-color: var(--cat-blue); }
+        .maker-input.category-3 { border-left-color: var(--cat-purple); }
+        
+        textarea.maker-input {
+            height: 120px;
+            resize: none;
+            font-size: 0.8rem;
+            text-align: left;
+            white-space: pre;
+            overflow-wrap: normal;
+            overflow-x: scroll;
+            border-left-width: 1px; /* Reset for textarea */
+        }
+        
+        .maker-controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* History Panel */
+        #history-panel {
+            position: fixed; /* Position relative to the viewport */
+            top: 50%;
+            right: 0;
+            transform: translate(calc(100% - 25px), -50%); /* Hide panel off-screen, centered vertically */
+            width: 180px;
+            height: 300px;
+            background-color: var(--color-tile);
+            border-radius: 8px 0 0 8px;
+            transition: transform 0.3s ease-in-out;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+        }
+        
+        @media (hover: hover) {
+            #history-panel:hover {
+                transform: translate(0, -50%);
+            }
+        }
+
+        #history-panel.is-open {
+            transform: translate(0, -50%);
+        }
+        
+        #history-tab {
+            width: 25px; /* Wider tab for easier hovering */
+            height: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--color-button);
+            border-radius: 8px 0 0 8px;
+        }
+        
+        #history-tab svg {
+            transform: rotate(180deg);
+        }
+
+        #history-content {
+            padding: 10px;
+            height: 100%;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        
+        .history-guess {
+            margin-bottom: 10px;
+            font-size: 0.8rem;
+            text-align: left;
+            background: #333;
+            padding: 5px;
+            border-radius: 4px;
+            position: relative;
+        }
+        
+        .history-guess.correct {
+            background: #2a3a2a; /* Greenish tint for correct guesses */
+        }
+        
+        .history-guess .one-away-icon {
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--cat-yellow);
+        }
+
+        /* Modal for results */
+        #results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0s 0.3s;
+            z-index: 100;
+        }
+
+        #results-modal.show {
+            opacity: 1;
+            visibility: visible;
+            transition-delay: 0s;
+        }
+
+        .results-content {
+            background-color: var(--color-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        #results-modal.show .results-content {
+            transform: scale(1);
+        }
+
+        .results-grid {
+            display: grid;
+            gap: 5px;
+            margin-top: 1rem;
+        }
+        
+        .result-row {
+            padding: 10px;
+            border-radius: 4px;
+            color: #000;
+            text-align: center;
+        }
+        .result-row strong {
+            display: block;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .result-row span {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="message-box"></div>
+
+    <!-- Title Screen -->
+    <div id="title-screen" class="screen">
+        <h1>Connectionsish</h1>
+        <p>Connections, but not. And you make your own puzzles.</p>
+        <div>
+            <button id="play-btn" class="menu-btn">Play</button>
+            <button id="make-btn" class="menu-btn">Make</button>
+        </div>
+    </div>
+    
+    <!-- Play Screen -->
+    <div id="play-screen" class="screen" style="display: none;">
+        <h2>Paste Puzzle Code</h2>
+        <p>Paste the generated JSON code below to start. If you don't have one, make one on the "Make" screen.</p>
+        <textarea id="json-input" class="maker-input" placeholder="Paste your ciphered puzzle code here..."></textarea>
+        <div>
+             <button id="start-game-btn" class="menu-btn">Start Game</button>
+             <button id="play-back-btn" class="menu-btn">Back</button>
+        </div>
+    </div>
+    
+    <!-- Make Screen -->
+    <div id="make-screen" class="screen" style="display: none;">
+        <h2>Create a Puzzle</h2>
+        <p>Fill out the categories and words below. The four words in each row belong to the category name in that row. You choose the difficulty for each row.</p>
+        <div id="maker-form" style="width: 100%;">
+            <div class="category-inputs">
+                <input type="text" class="maker-input" id="cat-0-name" placeholder="Category 1 Name (Easiest)">
+                <input type="text" class="maker-input" id="cat-1-name" placeholder="Category 2 Name">
+                <input type="text" class="maker-input" id="cat-2-name" placeholder="Category 3 Name">
+                <input type="text" class="maker-input" id="cat-3-name" placeholder="Category 4 Name (Hardest)">
+            </div>
+            <div class="maker-grid">
+                <!-- Grid will be populated by JS -->
+            </div>
+        </div>
+         <textarea id="json-output" class="maker-input" readonly placeholder="Your generated puzzle code will appear here..."></textarea>
+        <div class="maker-controls">
+            <button id="generate-json-btn" class="menu-btn">Generate Code</button>
+            <button id="copy-code-btn" class="menu-btn">Copy Code</button>
+            <button id="make-back-btn" class="menu-btn">Back</button>
+        </div>
+    </div>
+
+    <!-- Game Wrapper -->
+    <div class="game-wrapper" style="display: none;">
+        <div class="game-container">
+            <canvas id="gameCanvas"></canvas>
+            <div class="info-panel">
+                <div id="mistakes-container">
+                    <span>Mistakes remaining:</span>
+                </div>
+                <div class="controls">
+                    <button class="control-btn" id="shuffle-btn">Shuffle</button>
+                    <button class="control-btn" id="deselect-btn">Deselect all</button>
+                    <button class="control-btn" id="submit-btn">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+     <div id="history-panel" style="display: none;">
+        <div id="history-tab">
+            <svg width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.41 1.41L2.83 6L7.41 10.59L6 12L0 6L6 0L7.41 1.41Z" fill="white"/>
+            </svg>
+        </div>
+        <div id="history-content"></div>
+    </div>
+    
+    <!-- Results Modal -->
+    <div id="results-modal">
+        <div class="results-content">
+            <h2 id="results-title"></h2>
+            <p id="results-message"></p>
+            <div id="results-grid" class="results-grid"></div>
+            <div class="results-controls">
+                <button class="control-btn" id="copy-results-btn">Share</button>
+                <button class="control-btn" id="play-again-btn">New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Game Data (will be loaded dynamically) ---
+        let gameData = null;
+
+        // --- DOM Elements ---
+        const titleScreen = document.getElementById('title-screen');
+        const playScreen = document.getElementById('play-screen');
+        const makeScreen = document.getElementById('make-screen');
+        const gameWrapper = document.querySelector('.game-wrapper');
+        
+        const playBtn = document.getElementById('play-btn');
+        const makeBtn = document.getElementById('make-btn');
+        const playBackBtn = document.getElementById('play-back-btn');
+        const makeBackBtn = document.getElementById('make-back-btn');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const generateJsonBtn = document.getElementById('generate-json-btn');
+        const copyCodeBtn = document.getElementById('copy-code-btn');
+        const makerGrid = document.querySelector('#make-screen .maker-grid');
+        const jsonInput = document.getElementById('json-input');
+        const jsonOutput = document.getElementById('json-output');
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const messageBox = document.getElementById('message-box');
+        const mistakesContainer = document.getElementById('mistakes-container');
+        const shuffleBtn = document.getElementById('shuffle-btn');
+        const deselectBtn = document.getElementById('deselect-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const historyPanel = document.getElementById('history-panel');
+        const historyTab = document.getElementById('history-tab');
+        const historyContent = document.getElementById('history-content');
+        const resultsModal = document.getElementById('results-modal');
+        const resultsTitle = document.getElementById('results-title');
+        const resultsMessage = document.getElementById('results-message');
+        const resultsGrid = document.getElementById('results-grid');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const copyResultsBtn = document.getElementById('copy-results-btn');
+
+        // --- Game State ---
+        let tiles = [];
+        let selectedTiles = [];
+        let solvedCategories = [];
+        let mistakesLeft = 4;
+        let isAnimating = false;
+        let guessHistory = [];
+        let emojiHistory = [];
+        
+        const GRID_SIZE = 4;
+        const TILE_GAP = 10;
+        const TILE_ROUNDING = 8;
+        const FONT_SIZE_FACTOR = 0.25;
+
+        const CATEGORY_COLORS = {
+            0: '--cat-yellow',
+            1: '--cat-green',
+            2: '--cat-blue',
+            3: '--cat-purple'
+        };
+
+        // --- Navigation ---
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen, .game-wrapper, #history-panel').forEach(el => {
+                el.style.display = 'none';
+            });
+            const screen = document.getElementById(screenId);
+            if (screen) {
+                 screen.style.display = 'flex';
+            }
+            
+            if (screenId === 'game-wrapper') {
+                 document.querySelector('.game-wrapper').style.display = 'block';
+                 document.getElementById('history-panel').style.display = 'flex';
+            }
+        }
+        
+        playBtn.addEventListener('click', () => showScreen('play-screen'));
+        makeBtn.addEventListener('click', () => showScreen('make-screen'));
+        playBackBtn.addEventListener('click', () => showScreen('title-screen'));
+        makeBackBtn.addEventListener('click', () => showScreen('title-screen'));
+
+
+        // --- Puzzle Maker & Cipher Logic ---
+        function setupMakerGrid() {
+            // Color code static category name inputs
+             for (let i = 0; i < 4; i++) {
+                document.getElementById(`cat-${i}-name`).classList.add(`category-${i}`);
+            }
+
+            // Create and color code word inputs
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.classList.add('maker-input', `category-${i}`);
+                    input.id = `word-${i}-${j}`;
+                    input.placeholder = `Cat ${i+1}, Word ${j+1}`;
+                    makerGrid.appendChild(input);
+                }
+            }
+        }
+        
+        function caesarCipher(str, shift, decrypt = false) {
+            return str.replace(/[a-zA-Z]/g, (char) => {
+                const base = char < 'a' ? 'A'.charCodeAt(0) : 'a'.charCodeAt(0);
+                let code = char.charCodeAt(0);
+                let shiftedCode;
+
+                if (decrypt) {
+                    shiftedCode = code - base - shift;
+                    if (shiftedCode < 0) shiftedCode += 26;
+                } else {
+                    shiftedCode = code - base + shift;
+                }
+                
+                return String.fromCharCode(base + (shiftedCode % 26));
+            });
+        }
+        
+        generateJsonBtn.addEventListener('click', () => {
+             const puzzle = { categories: [], shift: 0 };
+             const shift = Math.floor(Math.random() * 21) + 5;
+             puzzle.shift = shift;
+
+             for (let i = 0; i < 4; i++) {
+                 const categoryName = document.getElementById(`cat-${i}-name`).value.trim();
+                 if (!categoryName) {
+                     displayMessage(`Please enter a name for Category ${i + 1}.`);
+                     return;
+                 }
+                 const words = [];
+                 for (let j = 0; j < 4; j++) {
+                     const word = document.getElementById(`word-${i}-${j}`).value.trim();
+                     if (!word) {
+                         displayMessage(`Please enter all four words for Category ${i + 1}.`);
+                         return;
+                     }
+                     words.push(caesarCipher(word.toUpperCase(), shift));
+                 }
+                 puzzle.categories.push({
+                     level: i,
+                     name: caesarCipher(categoryName.toUpperCase(), shift),
+                     words: words
+                 });
+             }
+             jsonOutput.value = JSON.stringify(puzzle, null, 2);
+             displayMessage('Code generated!', getCssVariable('--cat-green'));
+        });
+        
+        copyCodeBtn.addEventListener('click', () => {
+            const code = jsonOutput.value;
+            if (!code) {
+                displayMessage("Please generate the code first.");
+                return;
+            }
+            jsonOutput.select();
+            try {
+                document.execCommand('copy');
+                copyCodeBtn.textContent = 'Copied!';
+                setTimeout(() => { copyCodeBtn.textContent = 'Copy Code'; }, 2000);
+                displayMessage('Code copied to clipboard!', getCssVariable('--cat-green'));
+            } catch (err) {
+                console.error('Failed to copy code: ', err);
+                displayMessage('Failed to copy. Please copy manually.');
+            }
+        });
+
+        startGameBtn.addEventListener('click', () => {
+            try {
+                if (!jsonInput.value.trim()) {
+                    displayMessage("Please paste puzzle code.");
+                    return;
+                }
+                const puzzleData = JSON.parse(jsonInput.value);
+                if (!puzzleData.categories || typeof puzzleData.shift === 'undefined' || puzzleData.categories.length !== 4) {
+                    throw new Error("Invalid puzzle data structure.");
+                }
+                
+                gameData = { categories: [] };
+                puzzleData.categories.forEach(cat => {
+                    gameData.categories.push({
+                        level: cat.level,
+                        name: caesarCipher(cat.name, puzzleData.shift, true),
+                        words: cat.words.map(w => caesarCipher(w, puzzleData.shift, true))
+                    });
+                });
+
+                showScreen('game-wrapper');
+                initGame();
+            } catch (e) {
+                displayMessage("Invalid puzzle code. Please check and try again.");
+                console.error(e);
+            }
+        });
+
+        // --- Game Initialization ---
+        function initGame() {
+            if (!gameData) return;
+            tiles = [];
+            selectedTiles = [];
+            solvedCategories = [];
+            guessHistory = [];
+            emojiHistory = [];
+            mistakesLeft = 4;
+            isAnimating = false;
+            messageBox.textContent = '';
+            resultsModal.classList.remove('show');
+            renderHistory();
+
+            const allWords = gameData.categories.flatMap(cat => cat.words);
+            shuffleArray(allWords);
+            
+            allWords.forEach(word => {
+                tiles.push({
+                    word: word,
+                    x: 0, y: 0, width: 0, height: 0,
+                    targetX: 0, targetY: 0, targetWidth: 0, targetHeight: 0,
+                    isSelected: false, isSolved: false, isHidden: false,
+                    solvedCategory: null, shake: 0
+                });
+            });
+
+            setupCanvas();
+            updateMistakeDots();
+            calculateLayout();
+            if(!animationLoop.frame) animationLoop();
+        }
+
+        function setupCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+        }
+        
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // --- Layout and Drawing ---
+        function calculateLayout() {
+            const solvedCount = solvedCategories.length;
+            const unsolvedTiles = tiles.filter(t => !t.isSolved);
+            const canvasWidth = canvas.clientWidth;
+            const totalHeight = canvasWidth;
+            const tileSide = (totalHeight - TILE_GAP * (GRID_SIZE - 1)) / GRID_SIZE;
+            
+            solvedCategories.forEach((cat, catIndex) => {
+                const solvedY = catIndex * (tileSide + TILE_GAP);
+                const primaryTile = tiles.find(t => cat.words.includes(t.word) && !t.isHidden);
+                if (primaryTile) {
+                    primaryTile.targetX = 0;
+                    primaryTile.targetY = solvedY;
+                    primaryTile.targetWidth = canvasWidth;
+                    primaryTile.targetHeight = tileSide;
+                }
+            });
+
+            const unsolvedAreaYOffset = solvedCount * (tileSide + TILE_GAP);
+            unsolvedTiles.forEach((tile, index) => {
+                const row = Math.floor(index / GRID_SIZE);
+                const col = index % GRID_SIZE;
+                tile.targetWidth = tileSide;
+                tile.targetHeight = tileSide;
+                tile.targetX = col * (tileSide + TILE_GAP);
+                tile.targetY = unsolvedAreaYOffset + row * (tileSide + TILE_GAP);
+                if (tile.x === 0 && tile.y === 0) {
+                    tile.x = tile.targetX;
+                    tile.y = tile.targetY;
+                    tile.width = tile.targetWidth;
+                    tile.height = tile.targetHeight;
+                }
+            });
+        }
+        
+        function draw() {
+            ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+            tiles.forEach(tile => {
+                if (tile.isHidden) return;
+                tile.x += (tile.targetX - tile.x) * 0.1;
+                tile.y += (tile.targetY - tile.y) * 0.1;
+                tile.width += (tile.targetWidth - tile.width) * 0.1;
+                tile.height += (tile.targetHeight - tile.height) * 0.1;
+                if (tile.shake > 0) tile.shake--;
+                const shakeOffsetX = Math.sin(tile.shake * 0.5) * (tile.shake / 5);
+                if(tile.isSolved) drawSolvedTile(tile);
+                else drawUnsolvedTile(tile, shakeOffsetX);
+            });
+        }
+        
+        function drawUnsolvedTile(tile, shakeOffsetX = 0) {
+            ctx.fillStyle = tile.isSelected ? getCssVariable('--color-tile-selected') : getCssVariable('--color-tile');
+            ctx.beginPath();
+            ctx.roundRect(tile.x + shakeOffsetX, tile.y, tile.width, tile.height, TILE_ROUNDING);
+            ctx.fill();
+            const fontSize = tile.height * FONT_SIZE_FACTOR;
+            ctx.fillStyle = getCssVariable('--color-text');
+            ctx.font = `600 ${fontSize}px ${getComputedStyle(document.body).fontFamily}`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(tile.word, tile.x + tile.width / 2 + shakeOffsetX, tile.y + tile.height / 2);
+        }
+        
+        function drawSolvedTile(tile) {
+            const color = getCssVariable(CATEGORY_COLORS[tile.solvedCategory.level]);
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.roundRect(tile.x, tile.y, tile.width, tile.height, TILE_ROUNDING);
+            ctx.fill();
+            ctx.fillStyle = '#000000';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const categoryFontSize = tile.height * FONT_SIZE_FACTOR;
+            ctx.font = `700 ${categoryFontSize}px ${getComputedStyle(document.body).fontFamily}`;
+            ctx.fillText(tile.solvedCategory.name, tile.x + canvas.clientWidth / 2, tile.y + tile.height / 2 - categoryFontSize * 0.6);
+            const wordsFontSize = tile.height * (FONT_SIZE_FACTOR * 0.8);
+            ctx.font = `500 ${wordsFontSize}px ${getComputedStyle(document.body).fontFamily}`;
+            ctx.fillText(tile.solvedCategory.words.join(', '), tile.x + canvas.clientWidth / 2, tile.y + tile.height / 2 + wordsFontSize * 0.8);
+        }
+
+        function animationLoop() {
+            draw();
+            animationLoop.frame = requestAnimationFrame(animationLoop);
+        }
+        animationLoop.frame = null;
+
+        canvas.addEventListener('click', (e) => {
+            if (isAnimating || isGameOver()) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            for (let i = tiles.length - 1; i >= 0; i--) {
+                const tile = tiles[i];
+                if (!tile.isSolved && !tile.isHidden && x >= tile.x && x <= tile.x + tile.width && y >= tile.y && y <= tile.y + tile.height) {
+                    toggleTileSelection(tile);
+                    break;
+                }
+            }
+        });
+
+        shuffleBtn.addEventListener('click', () => {
+             if (isAnimating || isGameOver()) return;
+             const unsolvedTiles = tiles.filter(t => !t.isSolved);
+             shuffleArray(unsolvedTiles);
+             let unsolvedIndex = 0;
+             for (let i = 0; i < tiles.length; i++) {
+                 if (!tiles[i].isSolved) tiles[i] = unsolvedTiles[unsolvedIndex++];
+             }
+             calculateLayout();
+        });
+
+        deselectBtn.addEventListener('click', deselectAll);
+        submitBtn.addEventListener('click', handleSubmit);
+        playAgainBtn.addEventListener('click', () => {
+            if(animationLoop.frame) {
+                cancelAnimationFrame(animationLoop.frame);
+                animationLoop.frame = null;
+            }
+            showScreen('title-screen');
+        });
+        copyResultsBtn.addEventListener('click', copyResultsToClipboard);
+        window.addEventListener('resize', () => {
+            if (gameData) {
+                setupCanvas();
+                calculateLayout();
+            }
+        });
+        historyTab.addEventListener('click', (e) => {
+            e.stopPropagation();
+            historyPanel.classList.toggle('is-open');
+        });
+        document.addEventListener('click', (e) => {
+            if(historyPanel.classList.contains('is-open') && !historyPanel.contains(e.target)) {
+                historyPanel.classList.remove('is-open');
+            }
+        });
+
+
+        // --- Game Logic ---
+        function toggleTileSelection(tile) {
+            if (tile.isSelected) {
+                tile.isSelected = false;
+                selectedTiles = selectedTiles.filter(t => t.word !== tile.word);
+            } else if (selectedTiles.length < 4) {
+                tile.isSelected = true;
+                selectedTiles.push(tile);
+            }
+        }
+
+        function deselectAll() {
+             if (isAnimating || isGameOver()) return;
+            selectedTiles.forEach(tile => tile.isSelected = false);
+            selectedTiles = [];
+        }
+
+        function handleSubmit() {
+            if (isAnimating || selectedTiles.length !== 4 || isGameOver()) return;
+            const selectedWords = selectedTiles.map(t => t.word).sort();
+            if (guessHistory.some(g => g.words.slice().sort().join(',') === selectedWords.join(','))) {
+                displayMessage('Already guessed!');
+                return;
+            }
+            const foundCategory = gameData.categories.find(c =>
+                c.words.every(w => selectedWords.includes(w)) && selectedWords.every(w => c.words.includes(w))
+            );
+            if (foundCategory) handleCorrectGuess(foundCategory);
+            else handleIncorrectGuess();
+        }
+
+        function handleCorrectGuess(category) {
+            isAnimating = true;
+            solvedCategories.push(category);
+            guessHistory.push({ words: category.words, correct: true });
+            emojiHistory.push(Array(4).fill(CATEGORY_COLORS[category.level]));
+            renderHistory();
+            displayMessage('Correct!', getCssVariable('--cat-green'));
+            const sortedSelection = selectedTiles.sort((a, b) => a.x - b.x);
+            const tileSide = (canvas.clientWidth - TILE_GAP * (GRID_SIZE - 1)) / GRID_SIZE;
+            const targetY = (solvedCategories.length - 1) * (tileSide + TILE_GAP);
+            sortedSelection.forEach((tile, index) => {
+                tile.isSelected = false;
+                tile.targetX = index * (tileSide + TILE_GAP);
+                tile.targetY = targetY;
+            });
+            const primaryTile = sortedSelection[0];
+            const otherTiles = sortedSelection.slice(1);
+            setTimeout(() => {
+                otherTiles.forEach(tile => { tile.isHidden = true; tile.isSolved = true; });
+                primaryTile.isSolved = true;
+                primaryTile.solvedCategory = category;
+                selectedTiles = [];
+                calculateLayout();
+                const finalWidth = primaryTile.targetWidth;
+                const finalHeight = primaryTile.targetHeight;
+                primaryTile.targetWidth = finalWidth * 1.05;
+                primaryTile.targetHeight = finalHeight * 1.15;
+                setTimeout(() => {
+                    primaryTile.targetWidth = finalWidth;
+                    primaryTile.targetHeight = finalHeight;
+                    setTimeout(() => {
+                        isAnimating = false; 
+                        if (isGameWon()) endGame(true);
+                    }, 300);
+                }, 120);
+            }, 400);
+        }
+        
+        function handleIncorrectGuess() {
+            const selectedWords = selectedTiles.map(t => t.word);
+            mistakesLeft--;
+            updateMistakeDots();
+            selectedTiles.forEach(tile => tile.shake = 20);
+            let isOneAway = false;
+            for(const cat of gameData.categories) {
+                if (solvedCategories.includes(cat)) continue;
+                if(selectedWords.filter(t => cat.words.includes(t)).length === 3) {
+                    isOneAway = true;
+                    break;
+                }
+            }
+            guessHistory.push({ words: selectedWords, oneAway: isOneAway, correct: false });
+            emojiHistory.push(selectedWords.map(w => CATEGORY_COLORS[gameData.categories.find(c => c.words.includes(w)).level]));
+            renderHistory();
+            displayMessage(isOneAway ? 'One away...' : 'Incorrect');
+            if (mistakesLeft <= 0) endGame(false);
+        }
+
+        function displayMessage(text, color) {
+            messageBox.textContent = text;
+            messageBox.style.color = color || getCssVariable('--color-text');
+            messageBox.classList.add('show');
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 2000);
+        }
+
+        function updateMistakeDots() {
+            mistakesContainer.innerHTML = '<span>Mistakes remaining:</span>';
+            for (let i = 0; i < 4; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('mistake-dot');
+                if (i >= mistakesLeft) dot.classList.add('used');
+                mistakesContainer.appendChild(dot);
+            }
+        }
+        
+        function renderHistory() {
+            historyContent.innerHTML = '';
+            [...guessHistory].reverse().forEach(guess => {
+                const el = document.createElement('div');
+                el.classList.add('history-guess');
+                if (guess.correct) el.classList.add('correct');
+                el.textContent = guess.words.join(', ');
+                if (guess.oneAway) {
+                    const icon = document.createElement('span');
+                    icon.classList.add('one-away-icon');
+                    icon.textContent = '!';
+                    icon.title = 'One away!';
+                    el.appendChild(icon);
+                }
+                historyContent.appendChild(el);
+            });
+        }
+
+        // --- Game End ---
+        function isGameOver() { return mistakesLeft <= 0 || isGameWon(); }
+        function isGameWon() { return solvedCategories.length === gameData.categories.length; }
+
+        function endGame(isWin) {
+            isAnimating = true;
+            setTimeout(() => {
+                resultsTitle.textContent = isWin ? "Congratulations!" : "Next Time!";
+                resultsMessage.textContent = isWin ? "You found all the connections!" : "Here are the answers:";
+                if (!isWin) {
+                    const unsolved = gameData.categories.filter(c => !solvedCategories.find(sc => sc.name === c.name));
+                    solvedCategories.push(...unsolved);
+                }
+                resultsGrid.innerHTML = '';
+                const finalDisplay = [...solvedCategories].sort((a,b) => a.level - b.level);
+                finalDisplay.forEach(cat => {
+                    const row = document.createElement('div');
+                    row.classList.add('result-row');
+                    row.style.backgroundColor = getCssVariable(CATEGORY_COLORS[cat.level]);
+                    row.innerHTML = `<strong>${cat.name}</strong><span>${cat.words.join(', ')}</span>`;
+                    resultsGrid.appendChild(row);
+                });
+                resultsModal.classList.add('show');
+            }, 1200);
+        }
+        
+        function generateEmojiString() {
+            const emojiMap = { '--cat-yellow': '🟨', '--cat-green': '🟩', '--cat-blue': '🟦', '--cat-purple': '🟪' };
+            let result = "Connections\n";
+            result += emojiHistory.map(row => row.map(color => emojiMap[color] || '⬛').join('')).join('\n');
+            return result;
+        }
+        
+        function copyResultsToClipboard() {
+            const resultString = generateEmojiString();
+            const textArea = document.createElement('textarea');
+            textArea.value = resultString;
+            textArea.style.position = 'fixed'; 
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                copyResultsBtn.textContent = 'Copied!';
+                setTimeout(() => { copyResultsBtn.textContent = 'Share'; }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                copyResultsBtn.textContent = 'Failed!';
+                setTimeout(() => { copyResultsBtn.textContent = 'Share'; }, 2000);
+            }
+            document.body.removeChild(textArea);
+        }
+        
+        function getCssVariable(variable) {
+            return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+        }
+
+        // --- Start App ---
+        document.addEventListener('DOMContentLoaded', () => {
+            setupMakerGrid();
+            showScreen('title-screen');
+        });
+
+    </script>
+</body>
+</html>
+
