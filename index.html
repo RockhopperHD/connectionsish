@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Not Connections</title>
+    <title>Connectionsish Game</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -23,361 +23,272 @@
             --cat-green: #a0c35a;
             --cat-blue: #b0c4ef;
             --cat-purple: #d0b0ef;
+
+            --sprinkle-color-off: #1a1a1a;
         }
 
         body {
             background-color: var(--color-bg);
             color: var(--color-text);
             font-family: var(--font-family);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
-            flex-direction: column;
             text-align: center;
-            overflow: hidden; /* Prevents scrollbars from history panel */
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        #background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .sprinkle {
+            position: absolute;
+            width: 80px; /* 400% larger */
+            height: 20px;  /* 400% larger */
+            border-radius: 10px;
+            background-color: var(--sprinkle-color-off);
+            transform: rotate(var(--rotation));
+            transition: background-color 1s ease-in-out; /* Smooth color fade */
         }
 
         .screen {
             width: 100%;
             max-width: 500px;
-            padding: 1rem;
+            min-height: 100vh; /* Ensure screen takes at least full viewport height */
+            padding: 2rem 1rem;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            z-index: 10;
+            margin: 0 auto; /* Center the screen content */
         }
 
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
+        h1 { font-size: 2.5rem; font-weight: 700; }
+        .ish {
+            background: linear-gradient(90deg, var(--cat-yellow) 0%, var(--cat-green) 33%, var(--cat-blue) 66%, var(--cat-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
         }
+
+        h2 { font-size: 1.5rem; font-weight: 600; }
+        p { color: #ccc; max-width: 400px; } /* Constrain paragraph width for readability */
         
-        h2 {
-           font-size: 1.5rem;
-           font-weight: 600;
+        #about-screen p {
+            text-align: left;
         }
-
-        p {
-            color: #ccc;
-        }
+        #about-screen a {
+    color: #b0c4ef; /* This uses the light blue from your game's theme */
+}
 
         .game-wrapper {
             position: relative;
             width: 100%;
-            max-width: 500px;
-        }
-
-        .game-container {
-            width: 100%;
-            max-width: 500px;
-            margin: auto;
+            max-width: 700px; /* Wider wrapper */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
             padding: 1rem;
+            margin: 0 auto;
+        }
+        .game-container {
+            width: 100%; 
+            margin: auto; 
             box-sizing: border-box;
         }
-
         #gameCanvas {
-            width: 100%;
-            height: auto;
-            aspect-ratio: 1 / 1;
-            border-radius: 8px;
-            cursor: pointer;
-            touch-action: none;
+            width: 100%; height: auto; aspect-ratio: 5 / 3; border-radius: 8px; cursor: pointer; touch-action: none;
         }
-
-        .info-panel {
-            margin-top: 1rem;
-            width: 100%;
-        }
+        .info-panel { margin-top: 1rem; width: 100%; }
 
         #message-box {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0,0,0,0.8);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            z-index: 200;
-            opacity: 0;
-            visibility: hidden;
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background-color: rgba(0,0,0,0.8); color: white; padding: 10px 20px;
+            border-radius: 20px; z-index: 200; opacity: 0; visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s;
         }
-
-        #message-box.show {
-            opacity: 1;
-            visibility: visible;
-        }
+        #message-box.show { opacity: 1; visibility: visible; }
 
         #mistakes-container {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            align-items: center; /* Vertically align text and dots */
-            margin-bottom: 1rem;
+            display: flex; gap: 8px; justify-content: center; align-items: center; margin-bottom: 1rem;
         }
-
         .mistake-dot {
-            width: 16px;
-            height: 16px;
-            background-color: var(--color-mistake);
-            border-radius: 50%;
-            transition: background-color 0.3s ease;
+            width: 16px; height: 16px; background-color: var(--color-mistake);
+            border-radius: 50%; transition: background-color 0.3s ease;
         }
-        
-        .mistake-dot.used {
-             background-color: var(--color-mistake-used);
+        .mistake-dot.used { background-color: var(--color-mistake-used); }
+
+        .controls, .play-controls-main, .maker-controls, .results-controls {
+            display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; 
         }
 
-        .controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
+        .play-controls {
+            margin-top: 25px; display: flex; flex-direction: column; align-items: center; gap: 10px;
         }
-        
-        .results-controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 2rem;
+        #play-screen .menu-btn { font-size: 1rem; }
+        .small-btn {
+            font-size: 0.8rem !important; padding: 6px 16px !important; margin-top: 20px !important;
         }
+        .results-controls { margin-top: 2rem; }
 
         .control-btn, .menu-btn {
-            background-color: var(--color-button);
-            color: var(--color-text);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            margin: 5px;
+            background-color: var(--color-button); color: var(--color-text); border: none;
+            padding: 12px 24px; border-radius: 50px; font-size: 1.1rem; font-weight: 600;
+            cursor: pointer; transition: background-color 0.2s ease, transform 0.1s ease; margin: 5px;
         }
-
-        .control-btn:hover, .menu-btn:hover {
-            background-color: var(--color-button-hover);
-        }
-         .control-btn:active, .menu-btn:active {
-            transform: scale(0.95);
-        }
+        .control-btn:hover, .menu-btn:hover { background-color: var(--color-button-hover); }
+        .control-btn:active, .menu-btn:active { transform: scale(0.95); }
         
-        /* Maker Screen Styles */
         .maker-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            width: 100%;
-            margin-bottom: 1rem;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; margin-bottom: 1rem;
         }
         .category-inputs {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-            width: 100%;
-            margin-bottom: 1.5rem;
+            display: grid; grid-template-columns: 1fr; gap: 8px; width: 100%; margin-bottom: 1.5rem;
         }
         .maker-input {
-            width: 100%;
-            padding: 10px;
-            background-color: var(--color-tile);
-            border: 1px solid var(--color-button);
-            border-left-width: 4px;
-            color: var(--color-text);
-            border-radius: 6px;
-            font-family: var(--font-family);
-            font-size: 0.9rem;
-            box-sizing: border-box;
-            text-align: center;
-            transition: border-color 0.2s;
+            width: 100%; padding: 10px; background-color: var(--color-tile);
+            border: 1px solid var(--color-button); border-left-width: 4px;
+            color: var(--color-text); border-radius: 6px; font-family: var(--font-family);
+            font-size: 0.9rem; box-sizing: border-box; text-align: center; transition: border-color 0.2s;
         }
-
         .maker-input.category-0 { border-left-color: var(--cat-yellow); }
         .maker-input.category-1 { border-left-color: var(--cat-green); }
         .maker-input.category-2 { border-left-color: var(--cat-blue); }
         .maker-input.category-3 { border-left-color: var(--cat-purple); }
         
         textarea.maker-input {
-            height: 120px;
-            resize: none;
-            font-size: 0.8rem;
-            text-align: left;
-            white-space: pre;
-            overflow-wrap: normal;
-            overflow-x: scroll;
-            border-left-width: 1px; /* Reset for textarea */
+            height: 120px; resize: none; font-size: 0.8rem; text-align: left;
+            white-space: pre; overflow-wrap: normal; overflow-x: scroll; border-left-width: 1px;
         }
         
-        .maker-controls {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        /* History Panel */
         #history-panel {
-            position: fixed; /* Position relative to the viewport */
-            top: 50%;
-            right: 0;
-            transform: translate(calc(100% - 25px), -50%); /* Hide panel off-screen, centered vertically */
-            width: 180px;
-            height: 300px;
-            background-color: var(--color-tile);
-            border-radius: 8px 0 0 8px;
-            transition: transform 0.3s ease-in-out;
-            z-index: 50;
-            display: flex;
-            align-items: center;
+            position: fixed; top: 50%; right: 0; transform: translate(calc(100% - 25px), -50%);
+            width: 180px; height: 300px; background-color: var(--color-tile);
+            border-radius: 8px 0 0 8px; transition: transform 0.3s ease-in-out;
+            z-index: 50; display: flex; align-items: center;
         }
-        
-        @media (hover: hover) {
-            #history-panel:hover {
-                transform: translate(0, -50%);
-            }
-        }
-
-        #history-panel.is-open {
-            transform: translate(0, -50%);
-        }
-        
+        @media (hover: hover) { #history-panel:hover { transform: translate(0, -50%); } }
+        #history-panel.is-open { transform: translate(0, -50%); }
         #history-tab {
-            width: 25px; /* Wider tab for easier hovering */
-            height: 100%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--color-button);
-            border-radius: 8px 0 0 8px;
+            width: 25px; height: 100%; cursor: pointer; display: flex; align-items: center;
+            justify-content: center; background-color: var(--color-button); border-radius: 8px 0 0 8px;
         }
-        
-        #history-tab svg {
-            transform: rotate(180deg);
-        }
-
-        #history-content {
-            padding: 10px;
-            height: 100%;
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-        
+        #history-tab svg { transform: rotate(180deg); }
+        #history-content { padding: 10px; height: 100%; overflow-y: auto; flex-grow: 1; }
         .history-guess {
-            margin-bottom: 10px;
-            font-size: 0.8rem;
-            text-align: left;
-            background: #333;
-            padding: 5px;
-            border-radius: 4px;
-            position: relative;
+            margin-bottom: 10px; font-size: 0.8rem; text-align: left;
+            background: #333; padding: 5px; border-radius: 4px; position: relative;
         }
-        
-        .history-guess.correct {
-            background: #2a3a2a; /* Greenish tint for correct guesses */
-        }
-        
+        .history-guess.correct { background: #2a3a2a; }
         .history-guess .one-away-icon {
-            position: absolute;
-            top: 2px;
-            right: 4px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--cat-yellow);
+            position: absolute; top: 2px; right: 4px; font-size: 1.1rem;
+            font-weight: bold; color: var(--cat-yellow);
         }
 
-        /* Modal for results */
         #results-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0s 0.3s;
-            z-index: 100;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); display: flex; justify-content: center;
+            align-items: center; opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0s 0.3s; z-index: 100;
         }
-
-        #results-modal.show {
-            opacity: 1;
-            visibility: visible;
-            transition-delay: 0s;
-        }
-
+        #results-modal.show { opacity: 1; visibility: visible; transition-delay: 0s; }
         .results-content {
-            background-color: var(--color-bg);
-            padding: 2rem;
-            border-radius: 12px;
+            background-color: var(--color-bg); padding: 2rem; border-radius: 12px;
+            width: 90%; max-width: 400px; text-align: center;
+            transform: scale(0.9); transition: transform 0.3s ease;
+        }
+        #results-modal.show .results-content { transform: scale(1); }
+        .results-grid { display: grid; gap: 5px; margin-top: 1rem; }
+        .result-row { padding: 10px; border-radius: 4px; color: #000; text-align: center; }
+        .result-row strong { display: block; font-size: 1rem; font-weight: 700; }
+        .result-row span { font-size: 0.85rem; font-weight: 500; }
+
+        .title-footer {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: #888;
             width: 90%;
-            max-width: 400px;
-            text-align: center;
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-
-        #results-modal.show .results-content {
-            transform: scale(1);
-        }
-
-        .results-grid {
-            display: grid;
-            gap: 5px;
-            margin-top: 1rem;
-        }
-        
-        .result-row {
-            padding: 10px;
-            border-radius: 4px;
-            color: #000;
             text-align: center;
         }
-        .result-row strong {
-            display: block;
-            font-size: 1rem;
-            font-weight: 700;
+        #about-btn {
+            position: fixed; top: 15px; right: 15px; background-color: white; color: black; border: none;
+            width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; font-weight: 700;
+            cursor: pointer; z-index: 101; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center; line-height: 1;
         }
-        .result-row span {
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
+        #about-btn:hover { transform: scale(1.1); }
 
     </style>
 </head>
 <body>
+    <div id="background-container"></div>
+
+    <button id="about-btn" style="display: none;">?</button>
     <div id="message-box"></div>
+
+    <!-- About Screen -->
+    <div id="about-screen" class="screen" style="display: none;">
+        <h2>About</h2>
+        <p>Connectionsish is a personal project inspired (and basically the same thing as) the popular word-grouping game "Connections" by the New York Times.</p>
+        <p>This game was made largely with Google Gemini and coded as such, with tweaks from myself after the fact. You have full rights to look at and use parts of the code for your own projects or inspiration (which is to say please don't steal the whole thing). Please credit where it makes sense!</p>
+		<p>
+			<b>Why does this exist?</b>
+			Not only is it fun, it also shows the capability to create games and more complicated concepts like this using AI tools. You don't need to be a developer to make something like this!
+		</p>
+        <p>
+            <b>About the creator.</b>
+            I'm Owen Whelan, a student working with AI for educational and language applications.<u><a href="https://www.owenwhelan.com" target="_blank" rel="noopener noreferrer">You can learn more about me or get in touch on my website.</a></u>
+        </p>
+        <button id="about-back-btn" class="menu-btn">Back to Title</button>
+    </div>
 
     <!-- Title Screen -->
     <div id="title-screen" class="screen">
-        <h1>Connectionsish</h1>
-        <p>Connections, but not. And you make your own puzzles.</p>
-        <div>
-            <button id="play-btn" class="menu-btn">Play</button>
-            <button id="make-btn" class="menu-btn">Make</button>
+        <div id="title-content-box">
+            <h1>Connections<span class="ish">ish</span></h1>
+            <p>Make your own Connections-style puzzles and share them.</p>
+            <div>
+                <button id="make-btn" class="menu-btn">Make</button>
+                <button id="play-btn" class="menu-btn">Play</button>
+            </div>
         </div>
+        <footer class="title-footer">
+            <p>This a personal project and has no association with <i>The New York Times</i>, who made the original version of Connections. You should go play that, too. Other disclaimers available in the ? menu.</p>
+        </footer>
     </div>
     
     <!-- Play Screen -->
     <div id="play-screen" class="screen" style="display: none;">
         <h2>Paste Puzzle Code</h2>
-        <p>Paste the generated JSON code below to start. If you don't have one, make one on the "Make" screen.</p>
+        <p>Paste the generated JSON code below to start, or use the default puzzle.</p>
         <textarea id="json-input" class="maker-input" placeholder="Paste your ciphered puzzle code here..."></textarea>
-        <div>
-             <button id="start-game-btn" class="menu-btn">Start Game</button>
-             <button id="play-back-btn" class="menu-btn">Back</button>
+        <div class="play-controls">
+            <div class="play-controls-main">
+                 <button id="play-back-btn" class="menu-btn">Back</button>
+                 <button id="start-game-btn" class="menu-btn">Start Game</button>
+            </div>
+             <button id="use-default-btn" class="menu-btn small-btn">Use Default Set</button>
         </div>
     </div>
     
     <!-- Make Screen -->
     <div id="make-screen" class="screen" style="display: none;">
         <h2>Create a Puzzle</h2>
-        <p>Fill out the categories and words below. The four words in each row belong to the category name in that row. You choose the difficulty for each row.</p>
+        <p>Name your categories at the top and fill out the words below that. Click "Generate Code" when you're ready, and copy and paste the associated code to share the game with others. It's automatically "ciphered" or obscured as to not spoil it for others. You choose the difficulties, but don't necessarily have to follow them.</p>
         <div id="maker-form" style="width: 100%;">
             <div class="category-inputs">
                 <input type="text" class="maker-input" id="cat-0-name" placeholder="Category 1 Name (Easiest)">
@@ -391,9 +302,9 @@
         </div>
          <textarea id="json-output" class="maker-input" readonly placeholder="Your generated puzzle code will appear here..."></textarea>
         <div class="maker-controls">
+             <button id="make-back-btn" class="menu-btn">Back</button>
             <button id="generate-json-btn" class="menu-btn">Generate Code</button>
             <button id="copy-code-btn" class="menu-btn">Copy Code</button>
-            <button id="make-back-btn" class="menu-btn">Back</button>
         </div>
     </div>
 
@@ -439,18 +350,31 @@
     <script>
         // --- Game Data (will be loaded dynamically) ---
         let gameData = null;
+        const DEFAULT_GAME_DATA = {
+            categories: [
+                { level: 0, name: "STARTS WITH 'A'", words: ["APPLE", "ANT", "ART", "AIM"] },
+                { level: 1, name: "STARTS WITH 'B'", words: ["BALL", "BAT", "BOX", "BUG"] },
+                { level: 2, name: "STARTS WITH 'C'", words: ["CAT", "CUP", "CAR", "COIN"] },
+                { level: 3, name: "STARTS WITH 'D'", words: ["DOG", "DUCK", "DOLL", "DRUM"] }
+            ]
+        };
 
         // --- DOM Elements ---
+        const backgroundContainer = document.getElementById('background-container');
         const titleScreen = document.getElementById('title-screen');
         const playScreen = document.getElementById('play-screen');
         const makeScreen = document.getElementById('make-screen');
+        const aboutScreen = document.getElementById('about-screen');
         const gameWrapper = document.querySelector('.game-wrapper');
         
         const playBtn = document.getElementById('play-btn');
         const makeBtn = document.getElementById('make-btn');
+        const aboutBtn = document.getElementById('about-btn');
         const playBackBtn = document.getElementById('play-back-btn');
         const makeBackBtn = document.getElementById('make-back-btn');
+        const aboutBackBtn = document.getElementById('about-back-btn');
         const startGameBtn = document.getElementById('start-game-btn');
+        const useDefaultBtn = document.getElementById('use-default-btn');
         const generateJsonBtn = document.getElementById('generate-json-btn');
         const copyCodeBtn = document.getElementById('copy-code-btn');
         const makerGrid = document.querySelector('#make-screen .maker-grid');
@@ -482,11 +406,13 @@
         let isAnimating = false;
         let guessHistory = [];
         let emojiHistory = [];
+        let sprinkleInterval = null;
         
         const GRID_SIZE = 4;
         const TILE_GAP = 10;
         const TILE_ROUNDING = 8;
-        const FONT_SIZE_FACTOR = 0.25;
+        const FONT_SIZE_FACTOR = 0.24; // Further reduced font size
+        const MIN_FONT_SIZE = 10;
 
         const CATEGORY_COLORS = {
             0: '--cat-yellow',
@@ -494,6 +420,7 @@
             2: '--cat-blue',
             3: '--cat-purple'
         };
+        const COLOR_VALUES = Object.values(CATEGORY_COLORS);
 
         // --- Navigation ---
         function showScreen(screenId) {
@@ -509,34 +436,181 @@
                  document.querySelector('.game-wrapper').style.display = 'block';
                  document.getElementById('history-panel').style.display = 'flex';
             }
+            
+            if (screenId === 'title-screen') {
+                backgroundContainer.style.opacity = '1';
+                startSprinkleEffect();
+                aboutBtn.style.display = 'flex';
+            } else {
+                backgroundContainer.style.opacity = '0';
+                stopSprinkleEffect();
+                aboutBtn.style.display = 'none';
+            }
         }
         
         playBtn.addEventListener('click', () => showScreen('play-screen'));
         makeBtn.addEventListener('click', () => showScreen('make-screen'));
+        aboutBtn.addEventListener('click', () => showScreen('about-screen'));
         playBackBtn.addEventListener('click', () => showScreen('title-screen'));
         makeBackBtn.addEventListener('click', () => showScreen('title-screen'));
+        aboutBackBtn.addEventListener('click', () => showScreen('title-screen'));
+
+        // --- Background Effects ---
+        function startSprinkleEffect() {
+            if (sprinkleInterval) return;
+            backgroundContainer.innerHTML = ''; 
+
+            const MIN_DISTANCE = 100;
+            const K = 30;
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const cellSize = MIN_DISTANCE / Math.sqrt(2);
+            const gridWidth = Math.ceil(width / cellSize);
+            const gridHeight = Math.ceil(height / cellSize);
+            const grid = new Array(gridWidth * gridHeight);
+            const active = [];
+            const samples = [];
+            let lightableSprinkles = [];
+
+            function isValid(x, y) {
+                if (x < 0 || x >= width || y < 0 || y >= height) return false;
+                const col = Math.floor(x / cellSize);
+                const row = Math.floor(y / cellSize);
+                const startX = Math.max(0, col - 2);
+                const endX = Math.min(gridWidth - 1, col + 2);
+                const startY = Math.max(0, row - 2);
+                const endY = Math.min(gridHeight - 1, row + 2);
+
+                for (let i = startY; i <= endY; i++) {
+                    for (let j = startX; j <= endX; j++) {
+                        const neighbor = grid[i * gridWidth + j];
+                        if (neighbor) {
+                            const dx = neighbor.x - x;
+                            const dy = neighbor.y - y;
+                            if (dx * dx + dy * dy < MIN_DISTANCE * MIN_DISTANCE) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+            
+            const x0 = Math.random() * width;
+            const y0 = Math.random() * height;
+            const p0 = {x: x0, y: y0};
+            const col0 = Math.floor(x0 / cellSize);
+            const row0 = Math.floor(y0 / cellSize);
+            grid[row0 * gridWidth + col0] = p0;
+            active.push(p0);
+            samples.push(p0);
+
+            while (active.length > 0) {
+                const randomIndex = Math.floor(Math.random() * active.length);
+                const p = active[randomIndex];
+                let found = false;
+
+                for (let i = 0; i < K; i++) {
+                    const angle = Math.random() * 2 * Math.PI;
+                    const radius = Math.random() * MIN_DISTANCE + MIN_DISTANCE;
+                    const x = p.x + Math.cos(angle) * radius;
+                    const y = p.y + Math.sin(angle) * radius;
+
+                    if (isValid(x, y)) {
+                        const newPoint = {x: x, y: y};
+                        const col = Math.floor(x / cellSize);
+                        const row = Math.floor(y / cellSize);
+                        grid[row * gridWidth + col] = newPoint;
+                        active.push(newPoint);
+                        samples.push(newPoint);
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    active.splice(randomIndex, 1);
+                }
+            }
+
+            samples.forEach(point => {
+                 const sprinkle = document.createElement('div');
+                 sprinkle.classList.add('sprinkle');
+                 sprinkle.style.left = `${point.x}px`;
+                 sprinkle.style.top = `${point.y}px`;
+                 sprinkle.style.setProperty('--rotation', `${Math.random() * 360}deg`);
+                 backgroundContainer.appendChild(sprinkle);
+            });
+            
+            // Exclude sprinkles behind the modal from lighting up
+            const contentBox = document.getElementById('title-content-box');
+            if (contentBox) {
+                const contentBoxRect = contentBox.getBoundingClientRect();
+                lightableSprinkles = Array.from(backgroundContainer.children).filter(sprinkle => {
+                    const sprinkleRect = sprinkle.getBoundingClientRect();
+                    return !(sprinkleRect.left < contentBoxRect.right &&
+                             sprinkleRect.right > contentBoxRect.left &&
+                             sprinkleRect.top < contentBoxRect.bottom &&
+                             sprinkleRect.bottom > contentBoxRect.top);
+                });
+            } else {
+                lightableSprinkles = Array.from(backgroundContainer.children);
+            }
+
+            sprinkleInterval = setInterval(() => {
+                if (lightableSprinkles.length > 0) {
+                    const randomSprinkle = lightableSprinkles[Math.floor(Math.random() * lightableSprinkles.length)];
+                    const randomColorVar = COLOR_VALUES[Math.floor(Math.random() * COLOR_VALUES.length)];
+                    randomSprinkle.style.backgroundColor = getCssVariable(randomColorVar);
+                    setTimeout(() => {
+                        randomSprinkle.style.backgroundColor = getCssVariable('--sprinkle-color-off');
+                    }, 1500); 
+                }
+            }, 300);
+        }
+
+        function stopSprinkleEffect() {
+            clearInterval(sprinkleInterval);
+            sprinkleInterval = null;
+        }
 
 
         // --- Puzzle Maker & Cipher Logic ---
         function setupMakerGrid() {
-            // Color code static category name inputs
              for (let i = 0; i < 4; i++) {
                 document.getElementById(`cat-${i}-name`).classList.add(`category-${i}`);
             }
-
-            // Create and color code word inputs
             for (let i = 0; i < 4; i++) {
                 for (let j = 0; j < 4; j++) {
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.classList.add('maker-input', `category-${i}`);
                     input.id = `word-${i}-${j}`;
-                    input.placeholder = `Cat ${i+1}, Word ${j+1}`;
+                    input.placeholder = `Cat ${i + 1}, Word ${j + 1}`;
                     makerGrid.appendChild(input);
                 }
             }
         }
         
+        function setupDynamicPlaceholders() {
+            for (let i = 0; i < 4; i++) {
+                const categoryNameInput = document.getElementById(`cat-${i}-name`);
+                if (categoryNameInput) {
+                    categoryNameInput.addEventListener('input', (e) => {
+                        const categoryName = e.target.value.trim();
+                        for (let j = 0; j < 4; j++) {
+                            const wordInput = document.getElementById(`word-${i}-${j}`);
+                            if (wordInput) {
+                                if (categoryName) {
+                                    wordInput.placeholder = `${categoryName}, Word ${j + 1}`;
+                                } else {
+                                    wordInput.placeholder = `Cat ${i + 1}, Word ${j + 1}`;
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
         function caesarCipher(str, shift, decrypt = false) {
             return str.replace(/[a-zA-Z]/g, (char) => {
                 const base = char < 'a' ? 'A'.charCodeAt(0) : 'a'.charCodeAt(0);
@@ -630,6 +704,13 @@
             }
         });
 
+        useDefaultBtn.addEventListener('click', () => {
+            gameData = JSON.parse(JSON.stringify(DEFAULT_GAME_DATA)); // Deep copy to prevent mutation
+            showScreen('game-wrapper');
+            initGame();
+        });
+
+
         // --- Game Initialization ---
         function initGame() {
             if (!gameData) return;
@@ -683,28 +764,30 @@
             const solvedCount = solvedCategories.length;
             const unsolvedTiles = tiles.filter(t => !t.isSolved);
             const canvasWidth = canvas.clientWidth;
-            const totalHeight = canvasWidth;
-            const tileSide = (totalHeight - TILE_GAP * (GRID_SIZE - 1)) / GRID_SIZE;
+            const canvasHeight = canvas.clientHeight;
+
+            const tileWidth = (canvasWidth - TILE_GAP * (GRID_SIZE - 1)) / GRID_SIZE;
+            const tileHeight = (canvasHeight - TILE_GAP * (GRID_SIZE - 1)) / GRID_SIZE;
             
             solvedCategories.forEach((cat, catIndex) => {
-                const solvedY = catIndex * (tileSide + TILE_GAP);
+                const solvedY = catIndex * (tileHeight + TILE_GAP);
                 const primaryTile = tiles.find(t => cat.words.includes(t.word) && !t.isHidden);
                 if (primaryTile) {
                     primaryTile.targetX = 0;
                     primaryTile.targetY = solvedY;
                     primaryTile.targetWidth = canvasWidth;
-                    primaryTile.targetHeight = tileSide;
+                    primaryTile.targetHeight = tileHeight;
                 }
             });
 
-            const unsolvedAreaYOffset = solvedCount * (tileSide + TILE_GAP);
+            const unsolvedAreaYOffset = solvedCount * (tileHeight + TILE_GAP);
             unsolvedTiles.forEach((tile, index) => {
                 const row = Math.floor(index / GRID_SIZE);
                 const col = index % GRID_SIZE;
-                tile.targetWidth = tileSide;
-                tile.targetHeight = tileSide;
-                tile.targetX = col * (tileSide + TILE_GAP);
-                tile.targetY = unsolvedAreaYOffset + row * (tileSide + TILE_GAP);
+                tile.targetWidth = tileWidth;
+                tile.targetHeight = tileHeight;
+                tile.targetX = col * (tileWidth + TILE_GAP);
+                tile.targetY = unsolvedAreaYOffset + row * (tileHeight + TILE_GAP);
                 if (tile.x === 0 && tile.y === 0) {
                     tile.x = tile.targetX;
                     tile.y = tile.targetY;
@@ -734,9 +817,20 @@
             ctx.beginPath();
             ctx.roundRect(tile.x + shakeOffsetX, tile.y, tile.width, tile.height, TILE_ROUNDING);
             ctx.fill();
-            const fontSize = tile.height * FONT_SIZE_FACTOR;
+
+            const maxTextWidth = tile.width - (TILE_GAP * 1.5); 
+            let fontSize = tile.height * FONT_SIZE_FACTOR;
+            const fontFamily = getComputedStyle(document.body).fontFamily;
+            ctx.font = `600 ${fontSize}px ${fontFamily}`;
+            let textWidth = ctx.measureText(tile.word).width;
+
+            while (textWidth > maxTextWidth && fontSize > MIN_FONT_SIZE) {
+                fontSize--;
+                ctx.font = `600 ${fontSize}px ${fontFamily}`;
+                textWidth = ctx.measureText(tile.word).width;
+            }
+            
             ctx.fillStyle = getCssVariable('--color-text');
-            ctx.font = `600 ${fontSize}px ${getComputedStyle(document.body).fontFamily}`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(tile.word, tile.x + tile.width / 2 + shakeOffsetX, tile.y + tile.height / 2);
@@ -751,12 +845,12 @@
             ctx.fillStyle = '#000000';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            const categoryFontSize = tile.height * FONT_SIZE_FACTOR;
+            const categoryFontSize = tile.height * FONT_SIZE_FACTOR * 0.9;
             ctx.font = `700 ${categoryFontSize}px ${getComputedStyle(document.body).fontFamily}`;
-            ctx.fillText(tile.solvedCategory.name, tile.x + canvas.clientWidth / 2, tile.y + tile.height / 2 - categoryFontSize * 0.6);
-            const wordsFontSize = tile.height * (FONT_SIZE_FACTOR * 0.8);
+            ctx.fillText(tile.solvedCategory.name, tile.x + tile.width / 2, tile.y + tile.height / 2 - categoryFontSize * 0.6);
+            const wordsFontSize = tile.height * (FONT_SIZE_FACTOR * 0.8 * 0.9);
             ctx.font = `500 ${wordsFontSize}px ${getComputedStyle(document.body).fontFamily}`;
-            ctx.fillText(tile.solvedCategory.words.join(', '), tile.x + canvas.clientWidth / 2, tile.y + tile.height / 2 + wordsFontSize * 0.8);
+            ctx.fillText(tile.solvedCategory.words.join(', '), tile.x + tile.width / 2, tile.y + tile.height / 2 + wordsFontSize * 0.8);
         }
 
         function animationLoop() {
@@ -793,6 +887,7 @@
         deselectBtn.addEventListener('click', deselectAll);
         submitBtn.addEventListener('click', handleSubmit);
         playAgainBtn.addEventListener('click', () => {
+            resultsModal.classList.remove('show');
             if(animationLoop.frame) {
                 cancelAnimationFrame(animationLoop.frame);
                 animationLoop.frame = null;
@@ -855,14 +950,18 @@
             emojiHistory.push(Array(4).fill(CATEGORY_COLORS[category.level]));
             renderHistory();
             displayMessage('Correct!', getCssVariable('--cat-green'));
+            
+            const tileWidth = (canvas.clientWidth - TILE_GAP * (GRID_SIZE - 1)) / GRID_SIZE;
+            const tileHeight = (canvas.clientHeight - TILE_GAP * (GRID_SIZE - 1)) / GRID_SIZE;
+            const targetY = (solvedCategories.length - 1) * (tileHeight + TILE_GAP);
+
             const sortedSelection = selectedTiles.sort((a, b) => a.x - b.x);
-            const tileSide = (canvas.clientWidth - TILE_GAP * (GRID_SIZE - 1)) / GRID_SIZE;
-            const targetY = (solvedCategories.length - 1) * (tileSide + TILE_GAP);
             sortedSelection.forEach((tile, index) => {
                 tile.isSelected = false;
-                tile.targetX = index * (tileSide + TILE_GAP);
+                tile.targetX = index * (tileWidth + TILE_GAP);
                 tile.targetY = targetY;
             });
+
             const primaryTile = sortedSelection[0];
             const otherTiles = sortedSelection.slice(1);
             setTimeout(() => {
@@ -902,7 +1001,9 @@
             guessHistory.push({ words: selectedWords, oneAway: isOneAway, correct: false });
             emojiHistory.push(selectedWords.map(w => CATEGORY_COLORS[gameData.categories.find(c => c.words.includes(w)).level]));
             renderHistory();
-            displayMessage(isOneAway ? 'One away...' : 'Incorrect');
+            if (isOneAway) {
+                displayMessage('One away...');
+            }
             if (mistakesLeft <= 0) endGame(false);
         }
 
@@ -971,7 +1072,7 @@
         
         function generateEmojiString() {
             const emojiMap = { '--cat-yellow': '🟨', '--cat-green': '🟩', '--cat-blue': '🟦', '--cat-purple': '🟪' };
-            let result = "Connections\n";
+            let result = "Connectionsish\n";
             result += emojiHistory.map(row => row.map(color => emojiMap[color] || '⬛').join('')).join('\n');
             return result;
         }
@@ -1004,6 +1105,7 @@
         // --- Start App ---
         document.addEventListener('DOMContentLoaded', () => {
             setupMakerGrid();
+            setupDynamicPlaceholders();
             showScreen('title-screen');
         });
 
